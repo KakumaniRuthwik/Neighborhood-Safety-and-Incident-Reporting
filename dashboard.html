@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Dashboard - SafeCommunities</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="index.html" class="text-2xl font-bold text-blue-600">SafeCommunities</a>
+                <div class="flex space-x-4 justify-center items-center">
+                    <a href="index.html" class="text-gray-800 hover:text-blue-600">Home</a>
+                    <a href="dashboard.html" class="text-gray-800 hover:text-blue-600">Dashboard</a>
+                    <a href="report.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Report Incident</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <section class="bg-blue-600 text-white py-8">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-bold mb-2">Community Safety Dashboard</h1>
+            <p class="text-xl">Monitor and explore safety incidents in your area</p>
+        </div>
+    </section>
+
+    <!-- Dashboard Controls -->
+    <section class="bg-white shadow-md py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div class="flex flex-wrap gap-2">
+                    <button class="filter-btn active px-4 py-2 rounded-full bg-blue-600 text-white" data-filter="all" aria-label="Filter by all incidents">All Incidents</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300" data-filter="theft" aria-label="Filter by theft">Theft</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300" data-filter="vandalism" aria-label="Filter by vandalism">Vandalism</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300" data-filter="suspicious" aria-label="Filter by suspicious activity">Suspicious</button>
+                    <button class="filter-btn px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300" data-filter="hazard" aria-label="Filter by hazards">Hazards</button>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="time-filter" class="text-gray-700">Time Period:</label>
+                    <select id="time-filter" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Select time period">
+                        <option value="24h">Last 24 hours</option>
+                        <option value="week" selected>Last 7 days</option>
+                        <option value="month">Last 30 days</option>
+                        <option value="all">All time</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Content -->
+    <section class="py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Map Column -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <h2 class="text-xl font-semibold mb-4">Incident Map</h2>
+                        <div id="incident-map" class="h-96 bg-gray-100 rounded-md" aria-label="Map of incidents"></div>
+                    </div>
+                </div>
+
+                <!-- Stats Column -->
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                        <h2 class="text-xl font-semibold mb-4">Safety Statistics</h2>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-700">Total Incidents</span>
+                                <span class="text-2xl font-bold" id="total-incidents">0</span>
+                            </div>
+                            <div class="h-px bg-gray-200"></div>
+                            <div>
+                                <h3 class="text-gray-700 mb-2">By Type</h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center" data-type="theft">
+                                        <span class="text-sm">Theft</span>
+                                        <div class="w-2/3 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-red-500 h-2.5 rounded-full" style="width: 0%" id="theft-bar"></div>
+                                        </div>
+                                        <span class="text-sm font-medium" id="theft-count">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center" data-type="suspicious">
+                                        <span class="text-sm">Suspicious</span>
+                                        <div class="w-2/3 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 0%" id="suspicious-bar"></div>
+                                        </div>
+                                        <span class="text-sm font-medium" id="suspicious-count">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center" data-type="vandalism">
+                                        <span class="text-sm">Vandalism</span>
+                                        <div class="w-2/3 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-purple-500 h-2.5 rounded-full" style="width: 0%" id="vandalism-bar"></div>
+                                        </div>
+                                        <span class="text-sm font-medium" id="vandalism-count">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center" data-type="hazard">
+                                        <span class="text-sm">Hazards</span>
+                                        <div class="w-2/3 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-blue-500 h-2.5 rounded-full" style="width: 0%" id="hazard-bar"></div>
+                                        </div>
+                                        <span class="text-sm font-medium" id="hazard-count">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center" data-type="other">
+                                        <span class="text-sm">Other</span>
+                                        <div class="w-2/3 bg-gray-200 rounded-full h-2.5">
+                                            <div class="bg-gray-500 h-2.5 rounded-full" style="width: 0%" id="other-bar"></div>
+                                        </div>
+                                        <span class="text-sm font-medium" id="other-count">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <h2 class="text-xl font-semibold mb-4">Safety Tips</h2>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li>Keep doors and windows locked when away</li>
+                            <li>Report suspicious activity immediately</li>
+                            <li>Use exterior lighting to deter criminals</li>
+                            <li>Don't leave valuables visible in vehicles</li>
+                            <li>Consider joining a neighborhood watch group</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Incident List -->
+    <section class="py-8 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl font-bold mb-6">Recent Incidents</h2>
+            <div id="incident-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" aria-live="polite">
+                <div id="incident-loading" class="col-span-full text-center">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+                    <span class="ml-2 text-gray-700">Loading incidents...</span>
+                </div>
+                <div id="incident-error" class="col-span-full text-center hidden text-red-600">
+                    Failed to load incidents. Please try again later.
+                </div>
+                <div id="no-more-incidents" class="col-span-full text-center hidden text-gray-600">
+                    No more incidents to load.
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <button id="load-more-btn" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed" aria-label="Load more incidents">Load More</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-2xl font-bold">SafeCommunities</h2>
+                    <p class="text-gray-400">Making neighborhoods safer together</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-blue-400">Privacy Policy</a>
+                    <a href="#" class="hover:text-blue-400">Terms of Service</a>
+                    <a href="#" class="hover:text-blue-400">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeCommunities - Neighborhood Safety Reports</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="index.html" class="text-2xl font-bold text-blue-600">SafeCommunities</a>
+                <div class="flex space-x-4 justify-center items-center">
+                    <a href="index.html" class="text-gray-800 hover:text-blue-600">Home</a>
+                    <a href="dashboard.html" class="text-gray-800 hover:text-blue-600">Dashboard</a>
+                    <a href="report.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Report Incident</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-blue-600 text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Keep Your Neighborhood Safe</h1>
+            <p class="text-xl md:text-2xl mb-8">Report and track safety incidents in your community</p>
+            <a href="report.html" class="bg-white text-blue-600 px-6 py-3 rounded-md text-lg font-semibold hover:bg-gray-100">Report an Incident</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-10">How it Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Report Incidents</h3>
+                    <p class="text-gray-600">Quickly and easily submit reports about safety concerns in your area.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">View Map</h3>
+                    <p class="text-gray-600">See incidents on an interactive map to stay informed about your neighborhood.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Get Alerts</h3>
+                    <p class="text-gray-600">Receive notifications about new incidents in your selected areas.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Incidents Section -->
+    <section class="py-12 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-10">Recent Incidents</h2>
+            <div id="recent-incidents" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Incidents will be loaded here via JavaScript -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <span class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold mb-3">Suspicious Activity</span>
+                    <h3 class="text-xl font-semibold mb-2">Suspicious person near Main St</h3>
+                    <p class="text-gray-600 mb-4">Individual in dark clothing looking into car windows around 11pm.</p>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Downtown</span>
+                        <span>2 hours ago</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold mb-3">Theft</span>
+                    <h3 class="text-xl font-semibold mb-2">Package stolen from porch</h3>
+                    <p class="text-gray-600 mb-4">Amazon package was taken from front porch at 123 Elm Street around 3pm.</p>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Westside</span>
+                        <span>5 hours ago</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold mb-3">Safety Hazard</span>
+                    <h3 class="text-xl font-semibold mb-2">Large pothole on Oak Ave</h3>
+                    <p class="text-gray-600 mb-4">Dangerous pothole near the intersection of Oak and 5th Street.</p>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>Northside</span>
+                        <span>1 day ago</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-8">
+                <a href="dashboard.html" class="text-blue-600 font-semibold hover:underline">View All Incidents →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-2xl font-bold">SafeCommunities</h2>
+                    <p class="text-gray-400">Making neighborhoods safer together</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-blue-400">Privacy Policy</a>
+                    <a href="#" class="hover:text-blue-400">Terms of Service</a>
+                    <a href="#" class="hover:text-blue-400">Contact Us</a>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-gray-400">
+                <p>&copy; 2023 SafeCommunities. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

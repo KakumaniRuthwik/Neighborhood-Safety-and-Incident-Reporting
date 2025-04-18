@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report an Incident - SafeCommunities</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="index.html" class="text-2xl font-bold text-blue-600">SafeCommunities</a>
+                <div class="flex space-x-4 justify-center items-center">
+                    <a href="index.html" class="text-gray-800 hover:text-blue-600">Home</a>
+                    <a href="dashboard.html" class="text-gray-800 hover:text-blue-600">Dashboard</a>
+                    <a href="report.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Report Incident</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Report Form Section -->
+    <section class="py-12">
+        <div class="container mx-auto px-4 max-w-3xl">
+            <h1 class="text-3xl font-bold text-center mb-8">Report an Incident</h1>
+            <div class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <form id="incident-form" enctype="multipart/form-data">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="incident-type" class="block text-gray-700 font-medium mb-2">Incident Type</label>
+                            <select id="incident-type" name="incident_type" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required aria-required="true">
+                                <option value="" disabled selected>Select incident type</option>
+                                <option value="theft">Theft</option>
+                                <option value="vandalism">Vandalism</option>
+                                <option value="suspicious">Suspicious Activity</option>
+                                <option value="assault">Assault</option>
+                                <option value="hazard">Safety Hazard</option>
+                                <option value="noise">Noise Complaint</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="incident-title" class="block text-gray-700 font-medium mb-2">Incident Title</label>
+                            <input type="text" id="incident-title" name="title" placeholder="Brief description of the incident" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required aria-required="true">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="incident-description" class="block text-gray-700 font-medium mb-2">Description</label>
+                            <textarea id="incident-description" name="description" rows="4" placeholder="Provide details about what happened" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required aria-required="true"></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="incident-location" class="block text-gray-700 font-medium mb-2">Location</label>
+                            <input type="text" id="incident-location" name="location" placeholder="Street address or intersection" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required aria-required="true">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="incident-area" class="block text-gray-700 font-medium mb-2">Area/Neighborhood</label>
+                            <input type="text" id="incident-area" name="area" placeholder="e.g., Downtown, Northside" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required aria-required="true">
+                        </div>
+                        <div>
+                            <label for="incident-date" class="block text-gray-700 font-medium mb-2">Date of Incident</label>
+                            <input type="date" id="incident-date" name="date" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required aria-required="true">
+                        </div>
+                        <div>
+                            <label for="incident-time" class="block text-gray-700 font-medium mb-2">Time of Incident</label>
+                            <input type="time" id="incident-time" name="time" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required aria-required="true">
+                        </div>
+                        <div>
+                            <label for="reporter-name" class="block text-gray-700 font-medium mb-2">Your Name (Optional)</label>
+                            <input type="text" id="reporter-name" name="reporter_name" placeholder="Your name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="reporter-email" class="block text-gray-700 font-medium mb-2">Your Email (Optional)</label>
+                            <input type="email" id="reporter-email" name="reporter_email" placeholder="For follow-up questions" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="incident-photo" class="block text-gray-700 font-medium mb-2">Upload Photo (Optional)</label>
+                            <input type="file" id="incident-photo" name="photo" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <div class="flex items-start">
+                                <input type="checkbox" id="consent" name="consent" class="mt-1 mr-2" required aria-required="true">
+                                <label for="consent" class="text-gray-700">I confirm this report is truthful and accurate to the best of my knowledge</label>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <div id="form-loading" class="hidden text-center">
+                                <div class="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-600"></div>
+                                <span class="ml-2 text-gray-700">Submitting report...</span>
+                            </div>
+                            <div id="form-error" class="hidden text-center text-red-600"></div>
+                            <div id="form-success" class="hidden text-center text-green-600"></div>
+                        </div>
+                        <div class="md:col-span-2 text-center">
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400" aria-label="Submit incident report">Submit Report</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-2xl font-bold">SafeCommunities</h2>
+                    <p class="text-gray-400">Making neighborhoods safer together</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-blue-400">Privacy Policy</a>
+                    <a href="#" class="hover:text-blue-400">Terms of Service</a>
+                    <a href="#" class="hover:text-blue-400">Contact Us</a>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-gray-400">
+                <p>© 2025 SafeCommunities. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
