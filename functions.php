@@ -10,15 +10,37 @@ function sanitizeInput($data) {
     return $data;
 }
 
-// Function to check allowed file types
-function isAllowedFileType($file, $allowed_extensions) {
-    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    return in_array($extension, $allowed_extensions);
-}
+// <?php
+// require 'vendor/autoload.php'; // PHPMailer
 
-// Function to generate a unique filename
-function generateUniqueFilename($original_filename) {
-    $extension = pathinfo($original_filename, PATHINFO_EXTENSION);
-    return uniqid() . '_' . time() . '.' . strtolower($extension);
-}
-?>
+// function sanitizeInput($data) {
+//     return htmlspecialchars(strip_tags(trim($data)));
+// }
+
+// function sendOTPEmail($toEmail, $otpCode) {
+//     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+
+//     try {
+//         $mail->isSMTP();
+//         $mail->Host = 'smtp.gmail.com';
+//         $mail->SMTPAuth = true;
+//         $mail->Username = getenv('SMTP_USER');
+//         $mail->Password = getenv('SMTP_PASS');
+//         $mail->SMTPSecure = 'tls';
+//         $mail->Port = 587;
+
+//         $mail->setFrom(getenv('SMTP_USER'), 'SafeCommunities');
+//         $mail->addAddress($toEmail);
+//         $mail->isHTML(true);
+
+//         $mail->Subject = 'Your OTP for SafeCommunities';
+//         $mail->Body    = "<h2>Hi!</h2><p>Your verification code is: <strong>$otpCode</strong></p>";
+//         $mail->send();
+//         return true;
+//     } catch (Exception $e) {
+//         error_log("Mail Error: {$mail->ErrorInfo}");
+//         return false;
+//     }
+// }
+// 
+

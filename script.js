@@ -61,22 +61,10 @@ function initMap() {
         console.error('Leaflet library is not loaded');
         return;
     }
-    const map = L.map('incident-map').setView([14.366700, 79.616700], 12); // Center on Podalakur
+    const map = L.map('incident-map').setView([20.5937, 78.9629], 5); // Center on India with a wider zoom
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                map.setView([lat, lng], 14);
-            },
-            () => {
-                console.log('Unable to get location, using Podalakur default');
-            }
-        );
-    }
     window.incidentMap = map;
 }
 
@@ -138,51 +126,9 @@ function validateForm(form) {
     return true;
 }
 
-// Load incidents from server
-function loadIncidents() {
-    const loading = document.getElementById('incident-loading');
-    const error = document.getElementById('incident-error');
-    const noMore = document.getElementById('no-more-incidents');
-    if (loading) loading.classList.remove('hidden');
-    if (error) error.classList.add('hidden');
-    if (noMore) noMore.classList.add('hidden');
 
-    fetch('get_incidents.php?page=1')
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-            return response.json();
-        })
-        .catch(err => {
-            console.error('Error fetching incidents:', err);
-            if (error) {
-                error.classList.remove('hidden');
-                error.textContent = 'Failed to load incidents. Showing mock data.';
-            }
-            return { incidents: getMockIncidents(), has_more: false };
-        })
-        .then(data => {
-            const sanitizedData = data.incidents.map(incident => ({
-                ...incident,
-                type: incident.type || 'other',
-                area: incident.area || 'Unknown',
-                title: incident.title || 'Untitled',
-                description: incident.description || 'No description',
-                date: incident.date || new Date().toISOString().split('T')[0],
-                time: incident.time || '00:00',
-                location: incident.location || 'Unknown location',
-                lat: parseFloat(incident.lat) || 14.366700,
-                lng: parseFloat(incident.lng) || 79.616700,
-                photo_path: incident.photo_path || null,
-                created_at: incident.created_at || new Date().toISOString()
-            }));
-            displayIncidents(sanitizedData, true);
-            if (window.incidentMap) addIncidentsToMap(sanitizedData);
-            updateStats(sanitizedData);
-            const loadMoreBtn = document.getElementById('load-more-btn');
-            if (loadMoreBtn) loadMoreBtn.disabled = !data.has_more;
-            if (loading) loading.classList.add('hidden');
-        });
-}
+
+
 
 // Mock incidents
 function getMockIncidents() {
@@ -272,9 +218,12 @@ function addIncidentsToMap(incidents) {
     if (window.markers) window.markers.forEach(marker => window.incidentMap.removeLayer(marker));
     window.markers = [];
 
+    const bounds = []; // Create an empty array to store marker coordinates
+
     incidents.forEach(incident => {
         if (incident.lat && incident.lng) {
-            const marker = L.marker([incident.lat, incident.lng]).addTo(window.incidentMap);
+            const latLng = [incident.lat, incident.lng];
+            const marker = L.marker(latLng).addTo(window.incidentMap);
             marker.bindPopup(`
                 <div class="incident-popup">
                     <h3 class="font-bold">${incident.title}</h3>
@@ -286,8 +235,16 @@ function addIncidentsToMap(incidents) {
                 </div>
             `);
             window.markers.push(marker);
+            bounds.push(latLng); // Add the marker's coordinates to the bounds array
         }
     });
+
+    if (bounds.length > 0) {
+        window.incidentMap.fitBounds(bounds, { padding: [50, 50] }); // Adjust map to fit all markers with some padding
+    } else {
+        // Only set a default view if NO incidents were loaded
+        window.incidentMap.setView([20.5937, 78.9629], 5); // Default to India view if no incidents
+    }
 }
 
 // Filter incidents
@@ -323,8 +280,8 @@ function filterIncidents(type, timeRange) {
                 date: incident.date || new Date().toISOString().split('T')[0],
                 time: incident.time || '00:00',
                 location: incident.location || 'Unknown location',
-                lat: parseFloat(incident.lat) || 14.366700,
-                lng: parseFloat(incident.lng) || 79.616700,
+                lat: parseFloat(incident.lat), // Ensure these are parsed, but no default here
+                lng: parseFloat(incident.lng), // Ensure these are parsed, but no default here
                 photo_path: incident.photo_path || null,
                 created_at: incident.created_at || new Date().toISOString()
             }));
@@ -339,6 +296,7 @@ function filterIncidents(type, timeRange) {
             if (loading) loading.classList.add('hidden');
         });
 }
+
 
 // Filter mock incidents
 function filterMockIncidents(incidents, type, timeRange) {
@@ -381,58 +339,82 @@ function submitIncidentReport(form) {
     }
     if (submitBtn) submitBtn.disabled = true;
 
-    const formData = new FormData(form);
-    console.log('FormData entries:');
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value instanceof File ? value.name : value}`);
-    }
+    function submitFormWithLocation(lat, lng) {
+        const formData = new FormData(form);
+        if (lat !== null && lng !== null) {
+            formData.append('latitude', lat);
+            formData.append('longitude', lng);
+        }
 
-    // Sending the request to the PHP handler
-    fetch('report_handler.php', {
-        method: 'POST',
-        body: formData,
-        signal: AbortSignal.timeout(10000) // 10s timeout
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Server response:', data);
-        if (data.success) {
-            if (success) {
-                success.classList.remove('hidden');
-                success.textContent = 'Report submitted successfully! Redirecting to dashboard...';
-                setTimeout(() => window.location.href = 'dashboard.html', 2000);
+        console.log('FormData entries (with location):');
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value instanceof File ? value.name : value}`);
+        }
+
+        fetch('report_handler.php', {
+            method: 'POST',
+            body: formData,
+            signal: AbortSignal.timeout(10000) // 10s timeout
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Server response:', data);
+            if (data.success) {
+                if (success) {
+                    success.classList.remove('hidden');
+                    success.textContent = 'Report submitted successfully! Redirecting to dashboard...';
+                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                }
+                form.reset();
+            } else {
+                if (error) {
+                    error.classList.remove('hidden');
+                    error.textContent = data.message || 'Failed to submit report.';
+                }
             }
-            form.reset();
-        } else {
+        })
+        .catch(err => {
+            console.error('Error submitting report:', err);
             if (error) {
                 error.classList.remove('hidden');
-                error.textContent = data.message || 'Failed to submit report.';
+                if (err.name === 'TimeoutError' || err.message.includes('timeout')) {
+                    error.textContent = 'Request timed out. Please try again.';
+                } else if (err.message.includes('Failed to fetch')) {
+                    error.textContent = 'Network error. Please check your connection.';
+                } else {
+                    error.textContent = err.message || 'An unknown error occurred.';
+                }
             }
-        }
-    })
-    .catch(err => {
-        console.error('Error submitting report:', err);
-        if (error) {
-            error.classList.remove('hidden');
-            if (err.name === 'TimeoutError' || err.message.includes('timeout')) {
-                error.textContent = 'Request timed out. Please try again.';
-            } else if (err.message.includes('Failed to fetch')) {
-                error.textContent = 'Network error. Please check your connection.';
-            } else {
-                error.textContent = err.message || 'An unknown error occurred.';
-            }
-        }
-    })
-    .finally(() => {
-        if (loading) loading.classList.add('hidden');
-        if (submitBtn) submitBtn.disabled = false;
-    });
-}
+        })
+        .finally(() => {
+            if (loading) loading.classList.add('hidden');
+            if (submitBtn) submitBtn.disabled = false;
+        });
+    }
 
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                submitFormWithLocation(lat, lng);
+            },
+            error => {
+                console.error('Error getting geolocation:', error);
+                // If geolocation fails, submit without location
+                submitFormWithLocation(null, null);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    } else {
+        // Geolocation is not supported
+        submitFormWithLocation(null, null);
+    }
+}
 
 // Show form error
 function showFormError(message) {
@@ -444,9 +426,91 @@ function showFormError(message) {
 }
 
 let currentPage = 1;
-const perPage = 5; // For pagination
+const initialPerPage = -1; // Use -1 to indicate "load all" on the first page
+const subsequentPerPage = 5; // Use a smaller number for "Load More"
 
-// Load more incidents
+// Load incidents from server
+function loadIncidents() {
+    const loading = document.getElementById('incident-loading');
+    const error = document.getElementById('incident-error');
+    const noMore = document.getElementById('no-more-incidents');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+
+    if (loading) loading.classList.remove('hidden');
+    if (error) error.classList.add('hidden');
+    if (noMore) noMore.classList.add('hidden');
+    if (loadMoreBtn) loadMoreBtn.classList.add('hidden'); // Hide initially
+
+    const currentPerPage = currentPage === 1 ? initialPerPage : subsequentPerPage;
+
+    fetch(`get_incidents.php?page=${currentPage}&per_page=${currentPerPage}`)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            return response.json();
+        })
+        .catch(err => {
+            console.error('Error fetching incidents:', err);
+            if (error) {
+                error.classList.remove('hidden');
+                error.textContent = 'Failed to load incidents. Showing mock data.';
+            }
+            return { incidents: getMockIncidents(), has_more: false };
+        })
+        .then(data => {
+            const sanitizedData = data.incidents.map(incident => ({
+                ...incident,
+                type: incident.type || 'other',
+                area: incident.area || 'Unknown',
+                title: incident.title || 'Untitled',
+                description: incident.description || 'No description',
+                date: incident.date || new Date().toISOString().split('T')[0],
+                time: incident.time || '00:00',
+                location: incident.location || 'Unknown location',
+                lat: parseFloat(incident.lat),
+                lng: parseFloat(incident.lng),
+                photo_path: incident.photo_path || null,
+                created_at: incident.created_at || new Date().toISOString()
+            }));
+            displayIncidents(sanitizedData, currentPage === 1); // Clear list only on initial load
+            if (window.incidentMap) addIncidentsToMap(sanitizedData);
+            updateStats(sanitizedData);
+
+            if (currentPage === 1) {
+                if (data.has_more) {
+                    if (loadMoreBtn) {
+                        loadMoreBtn.classList.remove('hidden');
+                        loadMoreBtn.disabled = false;
+                        loadMoreBtn.textContent = 'Load More';
+                    }
+                    if (noMore) noMore.classList.add('hidden');
+                } else {
+                    if (loadMoreBtn) loadMoreBtn.classList.add('hidden');
+                    if (noMore) {
+                        noMore.classList.remove('hidden');
+                        noMore.textContent = 'No more incidents.';
+                    }
+                }
+            } else {
+                if (data.has_more) {
+                    if (loadMoreBtn) {
+                        loadMoreBtn.disabled = false;
+                        loadMoreBtn.textContent = 'Load More';
+                    }
+                    if (noMore) noMore.classList.add('hidden');
+                } else {
+                    if (loadMoreBtn) {
+                        loadMoreBtn.disabled = true;
+                        loadMoreBtn.textContent = 'No more incidents';
+                    }
+                    if (noMore) noMore.classList.remove('hidden');
+                    noMore.textContent = 'No more incidents to load.';
+                }
+            }
+
+            if (loading) loading.classList.add('hidden');
+        });
+}
+
 function loadMoreIncidents() {
     const activeBtn = document.querySelector('.filter-btn.active');
     const activeFilter = activeBtn ? activeBtn.getAttribute('data-filter') : 'all';
@@ -460,11 +524,9 @@ function loadMoreIncidents() {
     if (error) error.classList.add('hidden');
     if (noMore) noMore.classList.add('hidden');
     if (loadMoreBtn) loadMoreBtn.disabled = true;
+    loadMoreBtn.textContent = 'Loading all incidents...';
 
-    currentPage++;
-    console.log(`Fetching page ${currentPage} with type=${activeFilter}, time=${timeFilter}`);
-
-    fetch(`get_incidents.php?type=${activeFilter}&time=${timeFilter}&page=${currentPage}&per_page=${perPage}`)
+    fetch(`get_incidents.php?type=${activeFilter}&time=${timeFilter}&page=${currentPage + 1}&per_page=${loadAllRemaining}`)
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
             return response.json();
@@ -478,7 +540,7 @@ function loadMoreIncidents() {
             return { incidents: [], has_more: false };
         })
         .then(data => {
-            console.log('Fetched data:', data);
+            console.log('Fetched all remaining data:', data);
             const sanitizedData = data.incidents.map(incident => ({
                 ...incident,
                 type: incident.type || 'other',
@@ -488,34 +550,31 @@ function loadMoreIncidents() {
                 date: incident.date || new Date().toISOString().split('T')[0],
                 time: incident.time || '00:00',
                 location: incident.location || 'Unknown location',
-                lat: parseFloat(incident.lat) || 14.366700,
-                lng: parseFloat(incident.lng) || 79.616700,
+                lat: parseFloat(incident.lat),
+                lng: parseFloat(incident.lng),
                 photo_path: incident.photo_path || null,
                 created_at: incident.created_at || new Date().toISOString()
             }));
 
-            displayIncidents(sanitizedData, false);
+            displayIncidents(sanitizedData, false); // Append to the existing list
             if (window.incidentMap) addIncidentsToMap(sanitizedData);
+            updateStats(document.querySelectorAll('.incident-item')); // Update stats based on all loaded items
 
-            if (sanitizedData.length === 0 || !data.has_more) {
-                if (noMore) {
-                    noMore.classList.remove('hidden');
-                    noMore.textContent = 'No more incidents to load.';
-                }
-                if (loadMoreBtn) {
-                    loadMoreBtn.disabled = true;
-                    loadMoreBtn.textContent = 'No more incidents';
-                }
-            } else {
-                if (loadMoreBtn) {
-                    loadMoreBtn.disabled = false;
-                    loadMoreBtn.textContent = 'Load More';
-                }
+            if (noMore) {
+                noMore.classList.remove('hidden');
+                noMore.textContent = 'All incidents loaded.';
+            }
+            if (loadMoreBtn) {
+                loadMoreBtn.classList.add('hidden');
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.textContent = 'All incidents loaded';
             }
 
             if (loading) loading.classList.add('hidden');
+            currentPage = data.total > 0 ? Math.ceil(data.total / initialPerPage) : 1; // Update currentPage to reflect all loaded
         });
 }
+
 
 // Time ago
 function getTimeAgo(date) {

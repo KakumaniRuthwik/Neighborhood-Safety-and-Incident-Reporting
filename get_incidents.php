@@ -1,4 +1,13 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+ini_set('log_errors', 1);
+ini_set('error_log', '/Applications/XAMPP/xamppfiles/htdocs/php-project/php_errors.log'); // Adjust path if needed
+?>
+<?php
+require_once 'functions.php';
 require_once 'config.php';
 
 header('Content-Type: application/json');
@@ -6,22 +15,22 @@ header('Content-Type: application/json');
 try {
     // Base query
     $query = "
-        SELECT 
-            id,
-            COALESCE(incident_type, 'other') AS type,
-            COALESCE(title, 'Untitled') AS title,
-            COALESCE(description, 'No description') AS description,
-            COALESCE(area, 'Unknown') AS area,
-            COALESCE(location, 'Unknown location') AS location,
-            COALESCE(date, CURDATE()) AS date,
-            COALESCE(time, '00:00:00') AS time,
-            COALESCE(lat, 14.366700) AS lat,
-            COALESCE(lng, 79.616700) AS lng,
-            photo_path,
-            created_at
-        FROM incidents
-        WHERE 1=1
-    ";
+    SELECT
+        id,
+        COALESCE(incident_type, 'other') AS type,
+        COALESCE(title, 'Untitled') AS title,
+        COALESCE(description, 'No description') AS description,
+        COALESCE(area, 'Unknown') AS area,
+        COALESCE(location, 'Unknown location') AS location,
+        COALESCE(date, CURDATE()) AS date,
+        COALESCE(time, '00:00:00') AS time,
+        lat,
+        lng,
+        photo_path,
+        created_at
+    FROM incidents
+    WHERE 1=1
+";
     $params = [];
 
     // Apply type filter
@@ -64,9 +73,16 @@ try {
     $perPage = isset($_GET['per_page']) ? max(1, (int)$_GET['per_page']) : 5;
     $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
     $offset = ($page - 1) * $perPage;
-    $query .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-    $params[] = $perPage;
-    $params[] = $offset;
+
+    // Modify pagination for initial load of all incidents
+    if (isset($_GET['per_page']) && $_GET['per_page'] == -1 && $_GET['page'] == 1) {
+        // Fetch all without limit and offset for the first page
+        $query .= " ORDER BY created_at DESC";
+    } else {
+        $query .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        $params[] = $perPage;
+        $params[] = $offset;
+    }
 
     // Execute main query
     $stmt = $pdo->prepare($query);
@@ -93,13 +109,13 @@ try {
     }, $incidents);
 
     // Determine if more data exists
-    $hasMore = ($offset + count($incidents)) < $totalRows;
+    $hasMore = (isset($_GET['per_page']) && $_GET['per_page'] == -1 && $_GET['page'] == 1) ? false : (($offset + count($incidents)) < $totalRows);
 
     echo json_encode([
         'incidents' => $formattedIncidents,
         'has_more' => $hasMore,
         'page' => $page,
-        'per_page' => $perPage,
+        'per_page' => isset($_GET['per_page']) ? $_GET['per_page'] : 5,
         'total' => $totalRows
     ]);
 } catch (Exception $e) {

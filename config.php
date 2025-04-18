@@ -1,6 +1,6 @@
 <?php
 // Environment-based Database Configuration
-$dbHost = getenv('DB_HOST') ?: 'localhost';
+$dbHost = getenv('DB_HOST') ?: '127.0.0.1';
 $dbName = getenv('DB_NAME') ?: 'safecommunities';
 $dbUser = getenv('DB_USER') ?: 'root'; // Change in production
 $dbPass = getenv('DB_PASS') ?: '';     // Change in production
@@ -40,26 +40,26 @@ if (!is_dir($config['upload_dir'])) {
     }
 }
 
+
+
 if (!is_writable($config['upload_dir'])) {
-    die("Error: Upload directory is not writable.");
+    echo "Error: Upload directory is not writable.\n";
+    echo "Permissions: " . substr(sprintf('%o', fileperms($config['upload_dir'])), -4) . "\n";
+    echo "Owner: " . fileowner($config['upload_dir']) . "\n";
+    $ownerInfo = posix_getpwuid(fileowner($config['upload_dir']));
+    echo "Owner Name: " . $ownerInfo['name'] . "\n";
+    echo "Group: " . filegroup($config['upload_dir']) . "\n";
+    $groupInfo = posix_getgrgid(filegroup($config['upload_dir']));
+    echo "Group Name: " . $groupInfo['name'] . "\n";
+    exit();
 }
 
-// Helper Functions
-function sanitizeInput($data) {
-    if (is_null($data)) {
-        return '';
-    }
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
-    return $data;
-}
-
+// Helper Functions - REMOVED sanitizeInput() here
 function sanitizeForJson($data) {
     if (is_array($data)) {
         return array_map('sanitizeForJson', $data);
     }
-    return is_null($data) ? '' : sanitizeInput($data);
+    return is_null($data) ? '' : sanitizeInput($data); // Assuming sanitizeInput is in functions.php
 }
 
 function generateUniqueFilename($original_filename) {
