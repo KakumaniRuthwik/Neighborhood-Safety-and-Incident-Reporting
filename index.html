@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeCommunities - Neighborhood Safety Reports</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Navigation -->
     <nav class="bg-white shadow-md">
         <div class="container mx-auto px-4 py-3">
             <div class="flex justify-between items-center">
@@ -16,13 +15,15 @@
                 <div class="flex space-x-4 justify-center items-center">
                     <a href="index.html" class="text-gray-800 hover:text-blue-600">Home</a>
                     <a href="dashboard.html" class="text-gray-800 hover:text-blue-600">Dashboard</a>
-                    <a href="report.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Report Incident</a>
+                    <a href="report.html" class="text-gray-800 hover:text-blue-600">Report Incident</a>
+                    <a href="login.html" class="text-gray-800 hover:text-blue-600">Login</a>
+                    <a href="register.html" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Register</a>
+                    <a href="logout.php" id="logout-link" class="text-gray-800 hover:text-blue-600 hidden">Logout</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="bg-blue-600 text-white py-16">
         <div class="container mx-auto px-4 text-center">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">Keep Your Neighborhood Safe</h1>
@@ -31,7 +32,6 @@
         </div>
     </section>
 
-    <!-- Features Section -->
     <section class="py-12">
         <div class="container mx-auto px-4">
             <h2 class="text-3xl font-bold text-center mb-10">How it Works</h2>
@@ -67,12 +67,10 @@
         </div>
     </section>
 
-    <!-- Recent Incidents Section -->
     <section class="py-12 bg-gray-100">
         <div class="container mx-auto px-4">
             <h2 class="text-3xl font-bold text-center mb-10">Recent Incidents</h2>
             <div id="recent-incidents" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Incidents will be loaded here via JavaScript -->
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <span class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-semibold mb-3">Suspicious Activity</span>
                     <h3 class="text-xl font-semibold mb-2">Suspicious person near Main St</h3>
@@ -107,7 +105,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
@@ -122,7 +119,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center text-gray-400">
-                <p>&copy; 2023 SafeCommunities. All rights reserved.</p>
+                <p>© 2025 SafeCommunities. All rights reserved.</p>
             </div>
         </div>
     </footer>
